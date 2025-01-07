@@ -8,6 +8,9 @@ import sys
 sys.path.append("..")
 from args import get_parser
 
+import json
+
+# 加载layer1.json数据
 # =============================================================================
 parser = get_parser()
 opts = parser.parse_args()

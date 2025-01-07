@@ -13,6 +13,8 @@ import numpy as np
 from trijoint import im2recipe
 import pickle
 from args import get_parser
+import os
+os.environ['CUDA_VISIBLE_DEVICES']='0'
 
 # =============================================================================
 parser = get_parser()
@@ -66,7 +68,7 @@ def main():
     test_loader = torch.utils.data.DataLoader(
         ImagerLoader(opts.img_path,
  	    transforms.Compose([
-            transforms.Scale(256), # rescale the image keeping the original aspect ratio
+            transforms.Resize(256), # rescale the image keeping the original aspect ratio
             transforms.CenterCrop(224), # we get only the center of that rescaled
             transforms.ToTensor(),
             normalize,
@@ -87,7 +89,7 @@ def test(test_loader, model, criterion):
 
     # switch to evaluate mode
     model.eval()
-
+    torch.cuda.empty_cache()
     end = time.time()
     for i, (input, target) in enumerate(test_loader):
         input_var = list() 
@@ -140,7 +142,8 @@ def test(test_loader, model, criterion):
         print('* Test rec class loss {losses.avg:.4f}'.format(losses=rec_losses))
     else:
         print('* Test loss {losses.avg:.4f}'.format(losses=cos_losses))
-
+    if not os.path.exists(opts.path_results):
+        os.makedirs(opts.path_results)
     with open(opts.path_results+'img_embeds.pkl', 'wb') as f:
         pickle.dump(data0, f)
     with open(opts.path_results+'rec_embeds.pkl', 'wb') as f:
